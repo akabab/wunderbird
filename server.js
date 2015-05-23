@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http');
 var debug = require('debug')('wunderfun:server');
+var uuid = require('node-uuid');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -100,34 +101,47 @@ var onListening = function() {
     debug('Listening on ' + bind);
 };
 
-
 var server = http.createServer(app);
 
 var io = require('socket.io')(server);
 
 io.on('connection', function(socket) {
-    console.log('a user connected');
+    /* new player joined */
+    socket.uuid = uuid.v4();
+    console.log('new player connected: %s', socket.uuid);
 
-    socket.on('disconnect', function() {
-        console.log('user disconnected');
+    /* send peer event to others with his uuid */
+    socket.broadcast.emit('peer-join', socket.uuid);
+
+    /* player left */
+    socket.on('disconnect', function () {
+        console.log('player disconnected: %s', socket.uuid);
+        socket.broadcast.emit('peer-left', socket.uuid);
     });
 
-    socket.on('set pseudo', function(pseudo) {
+    /* player set pseudo */
+    socket.on('pseudo', function (pseudo) {
+        console.log("player set pseudo: %s -> %s", socket.uuid, pseudo);
         socket.pseudo = pseudo;
+        socket.broadcast.emit('peer-pseudo', {uuid: socket.uuid, pseudo: pseudo});
     });
 
-    socket.on('chat message', function(msg) {
-        console.log('message: ' + msg);
-        //send to everyone exept me
-        socket.broadcast.emit('chat message', msg);
+    /* player jump */
+    socket.on('jump', function () {
+        socket.broadcast.emit('jump', socket.uuid);
+    });
 
-        //send to all
-        io.emit('chat message', "all" + msg);
+    /* player die */
+    socket.on('die', function () {
+        socket.broadcast.emit('die', socket.uuid);
+    });
+
+    /* player say something */
+    socket.on('say', function (message) {
+        console.log('message from %s: %s', socket.pseudo || '?', message);
+        socket.broadcast.emit('say', {uuid: socket.uuid, message: message});
     });
 });
-
-//global io
-require("./lib/Socket")(io);
 
 var Relayr = require("./lib/Relayr");
 Relayr.setIO(io);
@@ -135,6 +149,5 @@ Relayr.setIO(io);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
 
 module.exports = app;

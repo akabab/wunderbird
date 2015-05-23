@@ -38,18 +38,11 @@
 
 <body>
     <div id="gamecontainer">
-        <div>
-            <form>
-                <label>Enter your name</label>
-                <input id="m" type="text" />
-            </form>
-        </div>
         <div id="gamescreen">
             <div id="sky" class="animated">
                 <div id="flyarea">
                     <div id="ceiling" class="animated"></div>
                     <!-- This is the flying and pipe area container -->
-                    <div id="player" class="bird animated"></div>
                     <div id="bigscore"></div>
                     <div id="splash"></div>
                     <div id="scoreboard">
@@ -64,12 +57,23 @@
             <div id="land" class="animated">
                 <div id="debug"></div>
             </div>
+            <div id="dialog">
+                <form id="set-pseudo">
+                    <label>Pseudo:</label>
+                    <input id="pseudo-input" type="text" />
+                </form>
+                <form id="chat">
+                    <label>Say:</label>
+                    <input id="say" type="text" />
+                </form>
+            </div>
         </div>
     </div>
     <div id="footer">
-        <a href="http://www.dotgears.com/">original game/concept/art by dong nguyen</a>
-        <a href="http://nebezb.com/">recreated by nebez briefkani</a>
-        <a href="http://github.com/nebez/floppybird/">view github project</a>
+        <a href="http://www.dotgears.com/">original: dong nguyen</a>
+        <a href="http://nebezb.com/">recreated: nebez briefkani</a>
+        <a href="">pimpimized: akabab</a>
+        <a href="">optimized: cdenis</a>
     </div>
     <div class="boundingbox" id="playerbox"></div>
     <div class="boundingbox" id="pipebox"></div>
@@ -77,24 +81,9 @@
     <script src="js/jquery.transit.min.js"></script>
     <script src="js/buzz.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script>
-    var socket = io();
-    $('form').submit(function() {
-        socket.emit('chat message', $('#m').val());
-        $('#m').val('');
-        return false;
-    });
-
-    socket.on('chat message', function(msg) {
-        console.log(msg);
-    });
-
-    socket.on('color', function(col) {
-        console.log(col);
-        var bg_col = "rgb(" + col.r + "," + col.g + "," + col.b + ")";
-        $("#sky").css("background-color", bg_col);
-    });
-    </script>
+    <script src="js/socket.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/pipe.js"></script>
     <script src="js/main.js"></script>
 </body>
 

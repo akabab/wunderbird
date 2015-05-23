@@ -25,13 +25,6 @@ var states = Object.freeze({
 
 var currentstate;
 
-var gravity = 0.25;
-var velocity = 0;
-var position = 180;
-var rotation = 0;
-var jump = -4.6;
-
-var score = 0;
 var highscore = 0;
 
 var pipeheight = 140; // 25 degree
@@ -43,9 +36,6 @@ var f = pipeheight / avgTemp;
 socket.on('temp', function(temp) {
     pipeheight = Math.floor(temp * f);
 });
-
-var pipewidth = 52;
-var pipes = new Array();
 
 var replayclickable = false;
 
@@ -59,10 +49,10 @@ var soundSwoosh = new buzz.sound("assets/sounds/sfx_swooshing.ogg");
 buzz.all().setVolume(volume);
 
 //loops
-var loopGameloop;
+var gameLoopActive;
 var loopPipeloop;
 
-var player, playerDOM;
+var _mainPlayer;
 
 $(document).ready(function() {
     if (window.location.search == "?debug")
@@ -75,8 +65,7 @@ $(document).ready(function() {
     if (savedscore != "")
         highscore = parseInt(savedscore);
 
-    playerDOM = document.getElementById('player');
-    player = $(playerDOM);
+    _mainPlayer = new Player();
 
     //start with the splash screen
     showSplash();
@@ -103,25 +92,15 @@ function setCookie(cname, cvalue, exdays) {
 function showSplash() {
     currentstate = states.SplashScreen;
 
-    //set the defaults (again)
-    velocity = 0;
-    position = 180;
-    rotation = 0;
-    score = 0;
+    Pipe.reset();
 
     //update the player in preparation for the next game
-    player.css({
-        y: 0,
-        x: 0
-    });
-    updatePlayer(player);
+    _mainPlayer.restore().update(1);
 
     soundSwoosh.stop();
     soundSwoosh.play();
 
     //clear out all the pipes if there are any
-    $(".pipe").remove();
-    pipes = new Array();
 
     //make everything animated again
     $(".animated").css('animation-play-state', 'running');
@@ -133,8 +112,10 @@ function showSplash() {
     }, 2000, 'ease');
 }
 
+var _previousTime;
 function startGame() {
     currentstate = states.GameScreen;
+
 
     //fade out the splash
     $("#splash").stop();
@@ -152,109 +133,26 @@ function startGame() {
     }
 
     //start up our loops
-    var updaterate = 1000.0 / 60.0; //60 times a second
     updatePipes();
-    loopGameloop = setInterval(gameloop, updaterate);
+    gameLoopActive = true;
+    _previousTime = window.performance.now();
+    requestAnimationFrame(gameloop);
     loopPipeloop = setInterval(updatePipes, 1400);
 
     //jump from the start!
-    playerJump();
-}
-
-function updatePlayer(playerInstance) {
-    //rotation
-    rotation = Math.min((velocity / 10) * 90, 90);
-
-    //apply rotation and position
-    playerInstance.css({
-        rotate: rotation,
-        top: position
-    });
+    Player.forEach.jump();
 }
 
 function gameloop() {
-    //update the player speed/position
-    velocity += gravity;
-    position += velocity;
-
+    var diff = window.performance.now() - _previousTime;
     //update the player
-    updatePlayer(player);
+    Player.forEach.update(diff / 16);
+    _mainPlayer.calcCollision();
 
-    //create the bounding box
-    var box = playerDOM.getBoundingClientRect();
-    var origwidth = 34.0;
-    var origheight = 24.0;
-
-    var boxwidth = origwidth - (Math.sin(Math.abs(rotation) / 90) * 8);
-    var boxheight = (origheight + box.height) / 2;
-    var boxleft = ((box.width - boxwidth) / 2) + box.left;
-    var boxtop = ((box.height - boxheight) / 2) + box.top;
-    var boxright = boxleft + boxwidth;
-    var boxbottom = boxtop + boxheight;
-
-    //if we're in debug mode, draw the bounding box
-    if (debugmode) {
-        var boundingbox = $("#playerbox");
-        boundingbox.css('left', boxleft);
-        boundingbox.css('top', boxtop);
-        boundingbox.css('height', boxheight);
-        boundingbox.css('width', boxwidth);
+    if (gameLoopActive) {
+        requestAnimationFrame(gameloop);
     }
-
-    //did we hit the ground?
-    if (box.bottom >= $("#land").offset().top) {
-        playerDead();
-        return;
-    }
-
-    //have they tried to escape through the ceiling? :o
-    var ceiling = $("#ceiling");
-    if (boxtop <= (ceiling.offset().top + ceiling.height()))
-        position = 0;
-
-    //we can't go any further without a pipe
-    if (pipes[0] == null)
-        return;
-
-    //determine the bounding box of the next pipes inner area
-    var nextpipe = pipes[0];
-    var nextpipeupper = nextpipe.children(".pipe_upper");
-
-    var pipetop = nextpipeupper.offset().top + nextpipeupper.height();
-    var pipeleft = nextpipeupper.offset().left - 2; // for some reason it starts at the inner pipes offset, not the outer pipes.
-    var piperight = pipeleft + pipewidth;
-    var pipebottom = pipetop + pipeheight;
-
-    if (debugmode) {
-        var boundingbox = $("#pipebox");
-        boundingbox.css('left', pipeleft);
-        boundingbox.css('top', pipetop);
-        boundingbox.css('height', pipeheight);
-        boundingbox.css('width', pipewidth);
-    }
-
-    //have we gotten inside the pipe yet?
-    if (boxright > pipeleft) {
-        //we're within the pipe, have we passed between upper and lower pipes?
-        if (boxtop > pipetop && boxbottom < pipebottom) {
-            //yeah! we're within bounds
-
-        } else {
-            //no! we touched the pipe
-            playerDead();
-            return;
-        }
-    }
-
-
-    //have we passed the imminent danger?
-    if (boxleft > piperight) {
-        //yes, remove it
-        pipes.splice(0, 1);
-
-        //and score a point
-        playerScore();
-    }
+    _previousTime += diff;
 }
 
 //Handle space bar
@@ -277,17 +175,10 @@ else
 
 function screenClick() {
     if (currentstate == states.GameScreen) {
-        playerJump();
+        _mainPlayer.jump();
     } else if (currentstate == states.SplashScreen) {
         startGame();
     }
-}
-
-function playerJump() {
-    velocity = jump;
-    //play jump sound
-    soundJump.stop();
-    soundJump.play();
 }
 
 function setBigScore(erase) {
@@ -297,7 +188,7 @@ function setBigScore(erase) {
     if (erase)
         return;
 
-    var digits = score.toString().split('');
+    var digits = _mainPlayer.score.toString().split('');
     for (var i = 0; i < digits.length; i++)
         elemscore.append("<img src='assets/font_big_" + digits[i] + ".png' alt='" + digits[i] + "'>");
 }
@@ -306,7 +197,7 @@ function setSmallScore() {
     var elemscore = $("#currentscore");
     elemscore.empty();
 
-    var digits = score.toString().split('');
+    var digits = _mainPlayer.score.toString().split('');
     for (var i = 0; i < digits.length; i++)
         elemscore.append("<img src='assets/font_small_" + digits[i] + ".png' alt='" + digits[i] + "'>");
 }
@@ -321,6 +212,7 @@ function setHighScore() {
 }
 
 function setMedal() {
+    var score = _mainPlayer.score;
     var elemmedal = $("#medal");
     elemmedal.empty();
 
@@ -343,27 +235,17 @@ function setMedal() {
     return true;
 }
 
-function playerDead() {
+function gameOver() {
     //stop animating everything!
     $(".animated").css('animation-play-state', 'paused');
     $(".animated").css('-webkit-animation-play-state', 'paused');
-
-    //drop the bird to the floor
-    var playerbottom = $("#player").position().top + $("#player").width(); //we use width because he'll be rotated 90 deg
-    var floor = $("#flyarea").height();
-    var movey = Math.max(0, floor - playerbottom);
-    $("#player").transition({
-        y: movey + 'px',
-        rotate: 90
-    }, 1000, 'easeInOutCubic');
 
     //it's time to change states. as of now we're considered ScoreScreen to disable left click/flying
     currentstate = states.ScoreScreen;
 
     //destroy our gameloops
-    clearInterval(loopGameloop);
     clearInterval(loopPipeloop);
-    loopGameloop = null;
+    gameLoopActive = false;
     loopPipeloop = null;
 
     //mobile browsers don't support buzz bindOnce event
@@ -381,6 +263,7 @@ function playerDead() {
 }
 
 function showScore() {
+    var score = _mainPlayer.score;
     //unhide us
     $("#scoreboard").css("display", "block");
 
@@ -465,28 +348,10 @@ $("#replay").click(function() {
     });
 });
 
-function playerScore() {
-    score += 1;
-    //play score sound
-    soundScore.stop();
-    soundScore.play();
-    setBigScore();
-}
-
 function updatePipes() {
-    //Do any pipes need removal?
-    $(".pipe").filter(function() {
-        return $(this).position().left <= -100;
-    }).remove()
+    Pipe.cleanup();
 
-    //add a new pipe (top height + bottom height  + pipeheight == 420) and put it in our tracker
-    var padding = 80;
-    var constraint = 420 - pipeheight - (padding * 2); //double padding (for top and bottom)
-    var topheight = Math.floor((Math.random() * constraint) + padding); //add lower padding
-    var bottomheight = (420 - pipeheight) - topheight;
-    var newpipe = $('<div class="pipe animated"><div class="pipe_upper" style="height: ' + topheight + 'px;"></div><div class="pipe_lower" style="height: ' + bottomheight + 'px;"></div></div>');
-    $("#flyarea").append(newpipe);
-    pipes.push(newpipe);
+    new Pipe(Math.random(), pipeheight);
 }
 
 var isIncompatible = {
