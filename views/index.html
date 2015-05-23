@@ -78,21 +78,22 @@
     <script src="js/buzz.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script>
-       var socket = io();
-       $('form').submit(function() {
-           socket.emit('chat message', $('#m').val());
-           $('#m').val('');
-           return false;
-       });
+    var socket = io();
+    $('form').submit(function() {
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+    });
 
-       socket.on('chat message', function(msg) {
-           console.log(msg);
-       });
+    socket.on('chat message', function(msg) {
+        console.log(msg);
+    });
 
-       socket.on('color', function(col) {
-           var bg_col = "rgb(" + col.r + "," + col.g + "," + col.b + ")";
-           $("#sky").css("background-color", bg_col);
-       });
+    socket.on('color', function(col) {
+        console.log(col);
+        var bg_col = "rgb(" + col.r + "," + col.g + "," + col.b + ")";
+        $("#sky").css("background-color", bg_col);
+    });
     </script>
     <script src="js/main.js"></script>
 </body>

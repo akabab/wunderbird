@@ -62,6 +62,8 @@ buzz.all().setVolume(volume);
 var loopGameloop;
 var loopPipeloop;
 
+var player, playerDOM;
+
 $(document).ready(function() {
     if (window.location.search == "?debug")
         debugmode = true;
@@ -73,8 +75,12 @@ $(document).ready(function() {
     if (savedscore != "")
         highscore = parseInt(savedscore);
 
+    playerDOM = document.getElementById('player');
+    player = $(playerDOM);
+
     //start with the splash screen
     showSplash();
+
 });
 
 function getCookie(cname) {
@@ -104,11 +110,11 @@ function showSplash() {
     score = 0;
 
     //update the player in preparation for the next game
-    $("#player").css({
+    player.css({
         y: 0,
         x: 0
     });
-    updatePlayer($("#player"));
+    updatePlayer(player);
 
     soundSwoosh.stop();
     soundSwoosh.play();
@@ -155,20 +161,18 @@ function startGame() {
     playerJump();
 }
 
-function updatePlayer(player) {
+function updatePlayer(playerInstance) {
     //rotation
     rotation = Math.min((velocity / 10) * 90, 90);
 
     //apply rotation and position
-    $(player).css({
+    playerInstance.css({
         rotate: rotation,
         top: position
     });
 }
 
 function gameloop() {
-    var player = $("#player");
-
     //update the player speed/position
     velocity += gravity;
     position += velocity;
@@ -177,7 +181,7 @@ function gameloop() {
     updatePlayer(player);
 
     //create the bounding box
-    var box = document.getElementById('player').getBoundingClientRect();
+    var box = playerDOM.getBoundingClientRect();
     var origwidth = 34.0;
     var origheight = 24.0;
 
