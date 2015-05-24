@@ -27,14 +27,15 @@ var currentstate;
 
 var highscore = 0;
 
-var pipeheight = 140; // 25 degree
-// var pipeheightMin =  84; -> 15
-// var pipeheightMax = 196; -> 35
+var pipeheight = 140;
 
-var avgTemp = 25;
-var f = pipeheight / avgTemp;
-socket.on('temp', function(temp) {
-    pipeheight = Math.floor(temp * f);
+/* set pipe height */
+var _avgHeight = 140;
+var _avgTemp = 25;
+socket.on('temperature', function (temp) {
+    var h = temp / _avgTemp * _avgHeight;
+    // console.log("temp: %s, h: %s", temp, h);
+    pipeheight = Math.floor(h);
 });
 
 var replayclickable = false;
@@ -116,7 +117,6 @@ var _previousTime;
 function startGame() {
     currentstate = states.GameScreen;
 
-
     //fade out the splash
     $("#splash").stop();
     $("#splash").transition({
@@ -140,7 +140,7 @@ function startGame() {
     loopPipeloop = setInterval(updatePipes, 1400);
 
     //jump from the start!
-    Player.forEach.jump();
+    _mainPlayer.start();
 }
 
 function gameloop() {

@@ -9,18 +9,35 @@ function Player(uuid) {
 	div.className = "bird animated";
 	div.id = "player-" + this.id;
 	document.body.appendChild(box);
-	_gameDiv.appendChild(div);
 	this.box = box;
 	this.HTMLElement = div;
 	this.restore();
     this.uuid = uuid;
     _uuids[uuid] = this;
 	_playerPool.push(this);
+    if (this.isMain()) {
+        _gameDiv.appendChild(div);
+        this.active = true;
+    } else {
+        this.HTMLElement.style.opacity = 0.5;
+        this.active = false;
+    }
 }
 
 Player.prototype.$ = function() {
     return $(this.HTMLElement);
 }
+
+Player.prototype.start = function() {
+    console.log('#id'+ this.id, 'start');
+    if (this.isMain()) {
+        this.emit('start');
+    } else {
+        this.active = true;
+        this.restore();
+        _gameDiv.appendChild(this.HTMLElement);
+    }
+};
 
 Player.prototype.addScore = function() {
 	this.score++;
@@ -41,8 +58,10 @@ Player.prototype.die = function() {
     }, 1000, 'easeInOutCubic');
 	if (this.isMain()) {
 		gameOver();
+        this.emit('die');
 	} else {
-		soundHit.play(); // lower sound lvl for other players mby ?
+        setTimeout(this.HTMLElement.remove.bind(this.HTMLElement), 1000);
+        this.active = false;
 	}
 };
 
@@ -57,12 +76,24 @@ Player.prototype.isMain = function() {
 Player.prototype.jump = function() {
     this.velocity = -4.6;
     //play jump sound
-    soundJump.stop();
-    soundJump.play();
     if (this.isMain()) {
+        soundJump.stop();
+        soundJump.play();
         this.emit('jump');
     }
 };
+
+Player.prototype.powerMorphing = function(state) {
+    if (this.morphingState !== state) {
+        this.morphingState = state;
+        if (state) {
+            this.HTMLElement.classList.add('fish');
+        } else {
+            this.HTMLElement.classList.remove('fish');
+        }
+    }
+
+}
 
 Player.prototype.restore = function() {
 	this.rotation = 0;
@@ -72,7 +103,7 @@ Player.prototype.restore = function() {
     this.score = 0;
 	this.$().css({
 		y: 0,
-		x: 25
+		x: 25 * (this.id + 1)
 	});
     return this;
 };
@@ -112,18 +143,22 @@ Player.prototype.calcCollision = function() {
     //did we hit the ground?
     if (box.bottom >= $("#land").offset().top) {
         this.die();
-        return;
+        return this;
     }
+
+    //did we enter water?
+    this.powerMorphing((box.bottom >= ($("#water").offset().top + 20)));
 
     //have they tried to escape through the ceiling? :o
     var ceiling = $("#ceiling");
-    if (boxtop <= (ceiling.offset().top + ceiling.height()))
-        this.position = 0;
+    if (boxtop <= (ceiling.offset().top + ceiling.height())) {
+        this.die();
+    }
 
     //we can't go any further without a pipe
     var pipes = _pipePool;
     if (pipes[0] == null)
-        return;
+        return this;
 
     //determine the bounding box of the next pipes inner area
     var nextpipeupper = $(pipes[0].upper);
@@ -150,7 +185,7 @@ Player.prototype.calcCollision = function() {
         } else {
             //no! we touched the pipe
             this.die();
-            return;
+            return this;
         }
     }
 
@@ -168,9 +203,12 @@ Player.prototype.calcCollision = function() {
 Player.forEach = {};
 Object.keys(Player.prototype).forEach(function (key) {
 	Player.forEach[key] = function () {
-		var i = -1, len = _playerPool.length;
+		var i = -1, len = _playerPool.length, p;
 		while (++i < len) {
-			_playerPool[i][key].apply(_playerPool[i], arguments);
+            p = _playerPool[i];
+            if (p.active) {
+                p[key].apply(p, arguments);
+            }
 		}
 		return Player;
 	};
@@ -180,10 +218,25 @@ Player.getPlayerPool = function () {
 	return _playerPool;
 }
 
+var _countCount = 0;
+function setTotalPlayersCount(count) {
+    _countCount = count;
+    document.getElementById('total-players-count').textContent = count;
+}
+
+socket.on('peer-list', function (list) {
+    setTotalPlayersCount(list.length + 1);
+    list.forEach(function (uuid) { new Player(uuid); });
+});
+
 socket.on('peer-left', function (uuid) {
+    setTotalPlayersCount(_countCount - 1);
+    console.log('player#'+ uuid, " left !")
     _uuids[uuid].die(); // should cleanup
 });
 socket.on('peer-join', function (uuid) {
+    setTotalPlayersCount(_countCount + 1);
+    console.log('player#'+ uuid, " joined !")
     new Player(uuid);
 });
 
@@ -194,7 +247,7 @@ socket.on('jump', function (uuid) {
 
 socket.on('start', function (uuid) {
     console.log('player#'+ uuid, " started !")
-    _uuids[uuid].restore();
+    _uuids[uuid].start();
 });
 
 socket.on('die', function (uuid) {

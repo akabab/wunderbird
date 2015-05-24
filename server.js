@@ -105,16 +105,27 @@ var server = http.createServer(app);
 
 var io = require('socket.io')(server);
 
-io.on('connection', function(socket) {
+var _sockets = [];
+io.on('connection', function (socket) {
     /* new player joined */
     socket.uuid = uuid.v4();
     console.log('new player connected: %s', socket.uuid);
+
+    /* send to myself  */
+    socket.emit('peer-list', _sockets.map(function (s) {
+        return s.uuid;
+    }));
+
+    /* push socket */
+    _sockets.push(socket);
 
     /* send peer event to others with his uuid */
     socket.broadcast.emit('peer-join', socket.uuid);
 
     /* player left */
     socket.on('disconnect', function () {
+        /* remove socket */
+        _sockets = _sockets.filter(function (s) { return s !== socket } );
         console.log('player disconnected: %s', socket.uuid);
         socket.broadcast.emit('peer-left', socket.uuid);
     });
@@ -129,6 +140,11 @@ io.on('connection', function(socket) {
     /* player jump */
     socket.on('jump', function () {
         socket.broadcast.emit('jump', socket.uuid);
+    });
+
+    /* player start */
+    socket.on('start', function () {
+        socket.broadcast.emit('start', socket.uuid);
     });
 
     /* player die */

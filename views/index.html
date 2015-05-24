@@ -18,7 +18,7 @@
 -->
 
 <head>
-    <title>Floppy Bird</title>
+    <title>Flappy Wunder</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="author" content="Nebez Briefkani" />
     <meta name="description" content="play floppy bird. a remake of popular game flappy bird using just html/css/js" />
@@ -54,6 +54,7 @@
                     <!-- Pipes go here! -->
                 </div>
             </div>
+            <div id="water" class="animated"></div>
             <div id="land" class="animated">
                 <div id="debug"></div>
             </div>
@@ -66,14 +67,15 @@
                     <label>Say:</label>
                     <input id="say" type="text" />
                 </form>
+                <div id="total-players">Total players: <span id="total-players-count"> </span></div>
+            </div>
+            <div id="footer">
+                <a href="http://www.dotgears.com/">original: dong nguyen</a>
+                <a href="http://nebezb.com/">recreated: nebez briefkani</a>
+                <a href="">pimpimized: akabab</a>
+                <a href="">optimized: cdenis</a>
             </div>
         </div>
-    </div>
-    <div id="footer">
-        <a href="http://www.dotgears.com/">original: dong nguyen</a>
-        <a href="http://nebezb.com/">recreated: nebez briefkani</a>
-        <a href="">pimpimized: akabab</a>
-        <a href="">optimized: cdenis</a>
     </div>
     <div class="boundingbox" id="playerbox"></div>
     <div class="boundingbox" id="pipebox"></div>

@@ -23,6 +23,8 @@ socket.on('say', function (o) {
 });
 
 /* Relayr events */
+
+/* COLOR */
 socket.on('color', function (color) {
     /* change sky color */
     var bg_col = "rgb(" + color.r + "," + color.g + "," + color.b + ")";
@@ -30,18 +32,46 @@ socket.on('color', function (color) {
     // console.log(color);
 });
 
-var _crazyModeNoiseLevel = 300;
+/* HUMIDITY */
+var _water = $("#water");
+var _waterLevel = 0; //[0-500]
+socket.on('humidity', function (humidity) {
+    console.log("Humidity: %s", humidity);
+    _waterLevel = humidity / 100 * 500;
+    _water.css('height', _waterLevel);
+});
+
+/* NOISE */
+var _crazyModeNoiseLevel = 500;
 var _baseDelay = _crazyModeNoiseLevel * 250;
 var _strobe = new Strobe();
+
+var _ceiling = $("#ceiling");
+var _ceilNoiseMin = 120; // noise start for ceil to get down
+var _ceilNoiseMax = _crazyModeNoiseLevel;
+var _ceilTopMin = -160;
+var _ceilTopMax = -15;
+var _ceilStep = Math.abs(_ceilTopMax - _ceilTopMin) / Math.abs(_ceilNoiseMax - _ceilNoiseMin);
 socket.on('noiseLevel', function (noise) {
-    console.log(noise);
+    // console.log("Noise: %s", noise);
     if (noise > _crazyModeNoiseLevel) {
         _strobe.update(_baseDelay / noise);
     }
-    else
+    else {
         _strobe.stop();
+
+        /* ceil */
+        var topValue = _ceilTopMin + ((noise - _ceilNoiseMin) * _ceilStep);
+        // console.log("noise: %s, topValue: %s", noise, topValue);
+        if (topValue > _ceilTopMax)
+            topValue = _ceilTopMax;
+        if (topValue < _ceilTopMin)
+            topValue = _ceilTopMin;
+        _ceiling.css('top', topValue);
+    }
 });
 
+/* Strobe */
 function Strobe () {
     this.timeoutId = null;
 

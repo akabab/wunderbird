@@ -14,186 +14,35 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+@-webkit-keyframes animLand { 0% { background-position: 0px 0px; } 100% { background-position: -335px 0px; } }
+@-moz-keyframes animLand { 0% { background-position: 0px 0px; } 100% { background-position: -335px 0px; } }
+@-o-keyframes animLand { 0% { background-position: 0px 0px; } 100% { background-position: -335px 0px; } }
+@keyframes animLand { 0% { background-position: 0px 0px; } 100% { background-position: -335px 0px; } }
 
-@-webkit-keyframes animLand {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -335px 0px;
-    }
-}
+@-webkit-keyframes animSky { 0% { background-position: 0px 100%; } 100% { background-position: -275px 100%; } }
+@-moz-keyframes animSky { 0% { background-position: 0px 100%; } 100% { background-position: -275px 100%; } }
+@-o-keyframes animSky { 0% { background-position: 0px 100%; } 100% { background-position: -275px 100%; } }
+@keyframes animSky { 0% { background-position: 0px 100%; } 100% { background-position: -275px 100%; } }
 
-@-moz-keyframes animLand {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -335px 0px;
-    }
-}
+@-webkit-keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
+@-moz-keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
+@-o-keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
+@keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
 
-@-o-keyframes animLand {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -335px 0px;
-    }
-}
+@-webkit-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@-moz-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@-o-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
 
-@keyframes animLand {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -335px 0px;
-    }
-}
+@-webkit-keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
+@-moz-keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
+@-o-keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
+@keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
 
-@-webkit-keyframes animSky {
-    0% {
-        background-position: 0px 100%;
-    }
-    100% {
-        background-position: -275px 100%;
-    }
-}
-
-@-moz-keyframes animSky {
-    0% {
-        background-position: 0px 100%;
-    }
-    100% {
-        background-position: -275px 100%;
-    }
-}
-
-@-o-keyframes animSky {
-    0% {
-        background-position: 0px 100%;
-    }
-    100% {
-        background-position: -275px 100%;
-    }
-}
-
-@keyframes animSky {
-    0% {
-        background-position: 0px 100%;
-    }
-    100% {
-        background-position: -275px 100%;
-    }
-}
-
-@-webkit-keyframes animBird {
-    from {
-        background-position: 0px 0px;
-    }
-    to {
-        background-position: 0px -96px;
-    }
-}
-
-@-moz-keyframes animBird {
-    from {
-        background-position: 0px 0px;
-    }
-    to {
-        background-position: 0px -96px;
-    }
-}
-
-@-o-keyframes animBird {
-    from {
-        background-position: 0px 0px;
-    }
-    to {
-        background-position: 0px -96px;
-    }
-}
-
-@keyframes animBird {
-    from {
-        background-position: 0px 0px;
-    }
-    to {
-        background-position: 0px -96px;
-    }
-}
-
-@-webkit-keyframes animPipe {
-    0% {
-        left: 900px;
-    }
-    100% {
-        left: -100px;
-    }
-}
-
-@-moz-keyframes animPipe {
-    0% {
-        left: 900px;
-    }
-    100% {
-        left: -100px;
-    }
-}
-
-@-o-keyframes animPipe {
-    0% {
-        left: 900px;
-    }
-    100% {
-        left: -100px;
-    }
-}
-
-@keyframes animPipe {
-    0% {
-        left: 900px;
-    }
-    100% {
-        left: -100px;
-    }
-}
-
-@-webkit-keyframes animCeiling {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -63px 0px;
-    }
-}
-
-@-moz-keyframes animCeiling {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -63px 0px;
-    }
-}
-
-@-o-keyframes animCeiling {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -63px 0px;
-    }
-}
-
-@keyframes animCeiling {
-    0% {
-        background-position: 0px 0px;
-    }
-    100% {
-        background-position: -63px 0px;
-    }
-}
+@-webkit-keyframes animCeiling { 0% { background-position: 0px 0px; } 100% { background-position: -63px 0px; } }
+@-moz-keyframes animCeiling { 0% { background-position: 0px 0px; } 100% { background-position: -63px 0px; } }
+@-o-keyframes animCeiling { 0% { background-position: 0px 0px; } 100% { background-position: -63px 0px; } }
+@keyframes animCeiling { 0% { background-position: 0px 0px; } 100% { background-position: -63px 0px; } }
 
 *,
 *:before,
@@ -236,12 +85,20 @@ body {
     position: absolute;
     bottom: 0;
     height: 20%;
-    padding-top: 22px;
+    padding: 5px;
+    padding-top: 24px;
     color: black;
+    z-index: 50;
 }
 
 #dialog form {
     display: inline-block;
+}
+#dialog input {
+    width: 100px;
+}
+#total-players {
+    margin-top: 3px;
 }
 /*
 Screen - Game
@@ -249,7 +106,7 @@ Screen - Game
 
 #gamescreen {
     position: absolute;
-    /*overflow: hidden;*/
+    overflow: hidden;
     /*width: 100%;*/
     /*height: 100%;*/
 
@@ -266,10 +123,35 @@ Screen - Game
     background-repeat: repeat-x;
     background-position: 0px 100%;
     background-color: #4ec0ca;
-    transition: background-color 5s ease-out;
-    -webkit-animation: animSky 7s linear infinite;
-    animation: animSky 7s linear infinite;
+    transition: background-color 1s ease-out;
+    -webkit-animation: animSky 8s linear infinite;
+    animation: animSky 8s linear infinite;
 }
+
+#water {
+    width: 100%;
+    height: 162px;
+    background-color: rgb(9, 91, 219);
+    opacity: 0.6;
+    bottom: 0;
+    position: absolute;
+    z-index: 20;
+    transition: height 5s linear;
+}
+
+#water::before {
+    display: block;
+    content: ' ';
+    height: 26px;
+    width: 100%;
+    background-image: url('../assets/water.png');
+    background-color: transparent;
+    position: absolute;
+    top: -26px;
+    -webkit-animation: animVodka 1.2s linear infinite;
+    animation: animVodka 1.2s linear infinite;
+}
+
 
 #flyarea {
     position: absolute;
@@ -283,7 +165,9 @@ Screen - Game
     top: -160px;
     height: 160px;
     width: 100%;
+    z-index: 100;
     background-image: url('../assets/ceiling.png');
+    transition: top 5s linear;
     -webkit-animation: animCeiling 481ms linear infinite;
     animation: animCeiling 481ms linear infinite;
 }
@@ -299,6 +183,7 @@ Screen - Game
     background-color: #ded895;
     -webkit-animation: animLand 2516ms linear infinite;
     animation: animLand 2516ms linear infinite;
+    z-index: 30;
 }
 
 #bigscore {
@@ -406,6 +291,15 @@ Screen - Game
     animation: animBird 300ms steps(4) infinite;
 }
 
+.fish {
+    position: absolute;
+    width: 44px;
+    height: 24px;
+    background-image: url('../assets/fish.png');
+    -webkit-animation: animBird 300ms steps(4) infinite;
+    animation: animBird 300ms steps(4) infinite;
+}
+
 .pipe {
     position: absolute;
     left: -100px;
@@ -455,9 +349,10 @@ Screen - Game
 #footer {
     position: absolute;
     bottom: 0;
-    height: 17%;
+    height: 9%;
     font-size: 11px;
     line-height: 7px;
+    z-index: 50;
 }
 
 #footer a,

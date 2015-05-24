@@ -8,8 +8,6 @@ function Pipe(height, space) {
     var topHeight = Math.floor((260 - space) * height) + 80; //add lower padding
     var lowerHeight = 420 - space - topHeight;
 
-    console.log(topHeight, lowerHeight);
-
 	div.className = "pipe animated";
 	upper.className = "pipe_upper";
 	lower.className = "pipe_lower";
