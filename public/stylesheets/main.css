@@ -29,10 +29,14 @@
 @-o-keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
 @keyframes animVodka { 0% { background-position: 0px 100%; } 100% { background-position: -64px 100%; } }
 
-@-webkit-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
-@-moz-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
-@-o-keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
-@keyframes animBird { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@-webkit-keyframes animBird { from { background-position: 10px 0px; } to { background-position: 10px -96px; } }
+@-moz-keyframes animBird { from { background-position: 10px 0px; } to { background-position: 10px -96px; } }
+@-o-keyframes animBird { from { background-position: 10px 0px; } to { background-position: 10px -96px; } }
+@keyframes animBird { from { background-position: 10px 0px; } to { background-position: 10px -96px; } }
+@-webkit-keyframes animFish { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@-moz-keyframes animFish { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@-o-keyframes animFish { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
+@keyframes animFish { from { background-position: 0px 0px; } to { background-position: 0px -96px; } }
 
 @-webkit-keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
 @-moz-keyframes animPipe { 0% { left: 900px; } 100% { left: -100px; } }
@@ -130,8 +134,8 @@ Screen - Game
 
 #water {
     width: 100%;
-    height: 162px;
-    background-color: rgb(9, 91, 219);
+    height: 0px;
+    background-color: rgb(8, 97, 237);
     opacity: 0.6;
     bottom: 0;
     position: absolute;
@@ -284,20 +288,25 @@ Screen - Game
 
 .bird {
     position: absolute;
-    width: 34px;
+    width: 44px;
     height: 24px;
+    background-repeat: no-repeat;
     background-image: url('../assets/bird.png');
     -webkit-animation: animBird 300ms steps(4) infinite;
     animation: animBird 300ms steps(4) infinite;
 }
 
 .fish {
-    position: absolute;
     width: 44px;
-    height: 24px;
     background-image: url('../assets/fish.png');
-    -webkit-animation: animBird 300ms steps(4) infinite;
-    animation: animBird 300ms steps(4) infinite;
+    -webkit-animation: animFish 300ms steps(4) infinite;
+    animation: animFish 300ms steps(4) infinite;
+}
+
+.pseudo {
+    position: absolute;
+    top: -15px;
+    left: 0px;
 }
 
 .pipe {

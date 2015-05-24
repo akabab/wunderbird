@@ -109,46 +109,52 @@ var _sockets = [];
 io.on('connection', function (socket) {
     /* new player joined */
     socket.uuid = uuid.v4();
+    socket.active = false;
+    socket.pseudo = "";
+
     console.log('new player connected: %s', socket.uuid);
 
     /* send to myself  */
     socket.emit('peer-list', _sockets.map(function (s) {
-        return s.uuid;
+        return { uuid: s.uuid, active: s.active, pseudo: s.pseudo };
     }));
 
     /* push socket */
     _sockets.push(socket);
 
     /* send peer event to others with his uuid */
-    socket.broadcast.emit('peer-join', socket.uuid);
+    socket.broadcast.emit('peer-join', { uuid: socket.uuid, active: socket.active, pseudo: socket.pseudo });
 
     /* player left */
     socket.on('disconnect', function () {
         /* remove socket */
         _sockets = _sockets.filter(function (s) { return s !== socket } );
+
         console.log('player disconnected: %s', socket.uuid);
         socket.broadcast.emit('peer-left', socket.uuid);
     });
 
     /* player set pseudo */
     socket.on('pseudo', function (pseudo) {
-        console.log("player set pseudo: %s -> %s", socket.uuid, pseudo);
+        // console.log("player set pseudo: %s -> %s", socket.infos.uuid, pseudo);
         socket.pseudo = pseudo;
-        socket.broadcast.emit('peer-pseudo', {uuid: socket.uuid, pseudo: pseudo});
+        socket.broadcast.emit('peer-pseudo', {uuid: socket.uuid, pseudo: socket.pseudo});
     });
 
     /* player jump */
     socket.on('jump', function () {
-        socket.broadcast.emit('jump', socket.uuid);
+        socket.broadcast.emit('jump', socket.uuid); //+pos
     });
 
     /* player start */
     socket.on('start', function () {
+        socket.active = true;
         socket.broadcast.emit('start', socket.uuid);
     });
 
     /* player die */
     socket.on('die', function () {
+        socket.active = false;
         socket.broadcast.emit('die', socket.uuid);
     });
 

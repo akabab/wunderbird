@@ -4,6 +4,7 @@ var socket = io();
 $('#set-pseudo').submit(function () {
     var p = $('#pseudo-input');
     socket.emit('pseudo', p.val());
+    _mainPlayer.setPseudo(p.val());
     p.val('');
     return false;
 });
@@ -36,7 +37,7 @@ socket.on('color', function (color) {
 var _water = $("#water");
 var _waterLevel = 0; //[0-500]
 socket.on('humidity', function (humidity) {
-    console.log("Humidity: %s", humidity);
+    // console.log("Humidity: %s", humidity);
     _waterLevel = humidity / 100 * 500;
     _water.css('height', _waterLevel);
 });

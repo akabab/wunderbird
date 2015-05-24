@@ -1,26 +1,35 @@
-var _playerPool = [], _uuids = {}, _gameDiv = document.getElementById('flyarea');
+var _playerPool = [],
+    _uuids = {},
+    _gameDiv = document.getElementById('flyarea');
 
-function Player(uuid) {
-	var div, box;
-	this.id = _playerPool.length;
-	box = document.createElement('div');
-	box.className = "boundingbox";
-	div = document.createElement('div');
-	div.className = "bird animated";
-	div.id = "player-" + this.id;
-	document.body.appendChild(box);
-	this.box = box;
-	this.HTMLElement = div;
-	this.restore();
-    this.uuid = uuid;
-    _uuids[uuid] = this;
-	_playerPool.push(this);
+function Player(o) {
+	console.log("Player construct", o);
+    var div, box, pseudo;
+    this.id = _playerPool.length;
+    div = document.createElement('div');
+    box = document.createElement('div');
+    pseudo = document.createElement('div');
+    div.className = "bird animated";
+    box.className = "boundingbox";
+    pseudo.className = "pseudo";
+    div.id = "player-" + this.id;
+    div.appendChild(pseudo);
+    document.body.appendChild(box);
+    this.box = box;
+    this.HTMLElement = div;
+    this.restore();
+    this.pseudoElement = pseudo;
+    _playerPool.push(this);
+
     if (this.isMain()) {
         _gameDiv.appendChild(div);
         this.active = true;
     } else {
         this.HTMLElement.style.opacity = 0.5;
-        this.active = false;
+        this.uuid = o.uuid;
+        this.setPseudo(o.pseudo);
+        this.active = o.active;
+        _uuids[o.uuid] = this;
     }
 }
 
@@ -29,7 +38,7 @@ Player.prototype.$ = function() {
 }
 
 Player.prototype.start = function() {
-    console.log('#id'+ this.id, 'start');
+    console.log('#id' + this.id, 'start');
     if (this.isMain()) {
         this.emit('start');
     } else {
@@ -39,13 +48,18 @@ Player.prototype.start = function() {
     }
 };
 
+Player.prototype.setPseudo = function(pseudo) {
+    this.pseudo = pseudo;
+    this.pseudoElement.textContent = pseudo;
+};
+
 Player.prototype.addScore = function() {
-	this.score++;
-	if (this.id === 0) {
-    	soundScore.stop();
-	    soundScore.play();
-	    setBigScore();
-	}
+    this.score++;
+    if (this.id === 0) {
+        soundScore.stop();
+        soundScore.play();
+        setBigScore();
+    }
 };
 
 Player.prototype.die = function() {
@@ -56,13 +70,13 @@ Player.prototype.die = function() {
         y: movey + 'px',
         rotate: 90
     }, 1000, 'easeInOutCubic');
-	if (this.isMain()) {
-		gameOver();
+    if (this.isMain()) {
+        gameOver();
         this.emit('die');
-	} else {
+    } else {
         setTimeout(this.HTMLElement.remove.bind(this.HTMLElement), 1000);
         this.active = false;
-	}
+    }
 };
 
 Player.prototype.emit = function(action) {
@@ -83,35 +97,39 @@ Player.prototype.jump = function() {
     }
 };
 
+function powerMorph() {
+    if (this.morphingState) {
+        this.HTMLElement.classList.add('fish');
+    } else {
+        this.HTMLElement.classList.remove('fish');
+    }
+}
+
 Player.prototype.powerMorphing = function(state) {
     if (this.morphingState !== state) {
         this.morphingState = state;
-        if (state) {
-            this.HTMLElement.classList.add('fish');
-        } else {
-            this.HTMLElement.classList.remove('fish');
-        }
+        clearTimeout(this.morphingTimeout);
+        this.morphingTimeout = setTimeout(powerMorph.bind(this), 200);
     }
-
 }
 
 Player.prototype.restore = function() {
-	this.rotation = 0;
+    this.rotation = 0;
     this.velocity = 0;
     this.position = 180;
     this.rotation = 0;
     this.score = 0;
-	this.$().css({
-		y: 0,
-		x: 25 * (this.id + 1)
-	});
+    this.$().css({
+        y: 0,
+        x: 25 * (this.id + 1)
+    });
     return this;
 };
 
 Player.prototype.update = function(diff) {
-	this.velocity += 0.25 * diff; // gravity
-	this.position += this.velocity;
-	this.rotation = Math.min((this.velocity / 10) * 90, 90);
+    this.velocity += 0.25 * diff; // gravity
+    this.position += this.velocity;
+    this.rotation = Math.min((this.velocity / 10) * 90, 90);
     this.$().css({
         rotate: this.rotation,
         top: this.position
@@ -147,7 +165,7 @@ Player.prototype.calcCollision = function() {
     }
 
     //did we enter water?
-    this.powerMorphing((box.bottom >= ($("#water").offset().top + 20)));
+    this.powerMorphing((box.bottom >= ($("#water").offset().top - 30)));
 
     //have they tried to escape through the ceiling? :o
     var ceiling = $("#ceiling");
@@ -201,61 +219,69 @@ Player.prototype.calcCollision = function() {
 };
 
 Player.forEach = {};
-Object.keys(Player.prototype).forEach(function (key) {
-	Player.forEach[key] = function () {
-		var i = -1, len = _playerPool.length, p;
-		while (++i < len) {
+Object.keys(Player.prototype).forEach(function(key) {
+    Player.forEach[key] = function() {
+        var i = -1,
+            len = _playerPool.length,
+            p;
+        while (++i < len) {
             p = _playerPool[i];
             if (p.active) {
                 p[key].apply(p, arguments);
             }
-		}
-		return Player;
-	};
+        }
+        return Player;
+    };
 });
 
-Player.getPlayerPool = function () {
-	return _playerPool;
+Player.getPlayerPool = function() {
+    return _playerPool;
 }
 
 var _countCount = 0;
+
 function setTotalPlayersCount(count) {
     _countCount = count;
     document.getElementById('total-players-count').textContent = count;
 }
 
-socket.on('peer-list', function (list) {
+socket.on('peer-list', function(list) {
     setTotalPlayersCount(list.length + 1);
-    list.forEach(function (uuid) { new Player(uuid); });
+    list.forEach(function(o) {
+    	console.log("Player already there: %s", o.pseudo);
+        new Player(o);
+    });
 });
 
 socket.on('peer-left', function (uuid) {
     setTotalPlayersCount(_countCount - 1);
-    console.log('player#'+ uuid, " left !")
+    console.log('player#' + uuid, " left !")
     _uuids[uuid].die(); // should cleanup
 });
 socket.on('peer-join', function (uuid) {
     setTotalPlayersCount(_countCount + 1);
-    console.log('player#'+ uuid, " joined !")
+    console.log('Player joined: %s', uuid)
     new Player(uuid);
 });
 
 socket.on('jump', function (uuid) {
-    console.log('player#'+ uuid, " jumped !")
-    _uuids[uuid].jump();
+    // console.log('Player jumped: %s', uuid);
+    if (_uuids[uuid])
+    	_uuids[uuid].jump();
+    else
+    	console.log("no player: %s", uuid);
 });
 
 socket.on('start', function (uuid) {
-    console.log('player#'+ uuid, " started !")
+    console.log('Player started: %s', uuid);
     _uuids[uuid].start();
 });
 
 socket.on('die', function (uuid) {
-    console.log('player#'+ uuid, " died !")
+    console.log('Player died: %s', uuid);
     _uuids[uuid].die();
 });
 
-socket.on('pseudo', function (o) {
-    _uuids[o.uuid].pseudo = o.pseudo;
+socket.on('peer-pseudo', function (o) {
+    _uuids[o.uuid].setPseudo(o.pseudo);
 });
-
