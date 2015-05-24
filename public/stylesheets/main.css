@@ -319,6 +319,13 @@ Screen - Game
     left: 0px;
 }
 
+.score {
+   position: absolute;
+   top: -25px;
+   left: -8px;
+   color: orangered;
+}
+
 .pipe {
     position: absolute;
     left: -100px;

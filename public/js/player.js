@@ -4,7 +4,7 @@ var _playerPool = [],
 
 function Player(o) {
 	console.log("Player construct", o);
-    var div, box, pseudo;
+    var div, box, pseudo, score;
     this.id = _playerPool.length;
     div = document.createElement('div');
     text = document.createElement('div');
@@ -13,14 +13,14 @@ function Player(o) {
     div.id = "player-" + this.id;
     div.className = "bird animated";
     pseudo.className = "pseudo";
-    score.className = "pseudo";
-    text.appendChild(pseudo);
+    score.className = "score";
     text.appendChild(score);
+    text.appendChild(pseudo);
     div.appendChild(text);
     this.HTMLElement = div;
-    this.restore();
     this.scoreElement = score;
     this.pseudoElement = pseudo;
+    this.restore();
     _playerPool.push(this);
     if (this.isMain()) {
         box = document.createElement('div');
@@ -28,6 +28,7 @@ function Player(o) {
         this.box = box;
         document.body.appendChild(box);
         _gameDiv.appendChild(div);
+        this.setPseudo(readCookie('pseudo'));
         this.active = false;
     } else {
         this.HTMLElement.style.opacity = 0.5;
@@ -54,7 +55,7 @@ Player.prototype.start = function() {
         _gameDiv.appendChild(this.HTMLElement);
     }
     this.active = true;
-    this.addScore(0);
+    this.addScore(0); // why?
 };
 
 Player.prototype.setPseudo = function(pseudo) {
@@ -63,16 +64,18 @@ Player.prototype.setPseudo = function(pseudo) {
 };
 
 Player.prototype.addScore = function(score) {
-    if (score) {
+    if (score >= 0) {
         this.score = score;
     } else {
         this.score++;
     }
     this.scoreElement.textContent = this.score;
     if (this.isMain()) {
-        soundScore.stop();
-        soundScore.play();
-        setBigScore();
+        if (this.score > 0) {
+            soundScore.stop();
+            soundScore.play();
+            setBigScore();
+        }
         socket.emit('score', this.score);
     }
 };
@@ -110,7 +113,6 @@ Player.prototype.jump = function (position) {
         soundJump.play();
         socket.emit('jump', this.position);
     } else {
-        console.log(position);
         this.position = position;
     }
 };
@@ -137,6 +139,7 @@ Player.prototype.restore = function() {
     this.position = 180;
     this.rotation = 0;
     this.score = 0;
+    this.addScore(0);
     this.$().css({
         y: 0,
         x: 25 * (this.id + 1)
