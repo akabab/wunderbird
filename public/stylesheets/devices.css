@@ -5,20 +5,24 @@ body {
   	padding-top: 0px;
     overflow: hidden;
     font-family: monospace;
-    font-size: 12px;
+    font-size: 14px;
     color: black;
 }
 
 .device {
-	width: 150px;
-	height: 50px;
+	width: 350px;
+	height: 180px;
 	background-color: black;
 	color: white;
 	margin: 10px;
+	font-size: 30px;
 }
 
 .name {
-	font-size: 14px;
+	font-size: 40px;
+}
+.name, .status, .value {
+	margin: 10px;
 }
 
 .status {

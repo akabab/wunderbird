@@ -71,8 +71,13 @@ Player.prototype.addScore = function(score) {
     this.scoreElement.textContent = this.score;
     if (this.isMain()) {
         if (this.score > 0) {
-            soundScore.stop();
-            soundScore.play();
+            if (this.score % 5) {
+                soundScore.stop();
+                soundScore.play();
+            } else {
+                soundScoreHigh.stop();
+                soundScoreHigh.play();
+            }
             setBigScore();
         }
         socket.emit('score', this.score);
@@ -104,13 +109,16 @@ Player.prototype.isMain = function() {
     return this.id === 0;
 }
 
+var _prevJumpSound;
 Player.prototype.jump = function (position) {
     this.velocity = -4.6;
     //play jump sound
     if (this.isMain()) {
         var id = ~~(Math.random() * soundJump.length);
-        soundJump[id].stop();
+        if (_prevJumpSound)
+            _prevJumpSound.stop();
         soundJump[id].play();
+        _prevJumpSound = soundJump[id];
         socket.emit('jump', this.position);
     } else {
         this.position = position;
@@ -271,18 +279,20 @@ function setTotalPlayersCount(count) {
 }
 
 socket.on('peer-list', function(list) {
-    setTotalPlayersCount(list.length + 1);
+    var count = 0;
     list.forEach(function(o) {
+        if (o.active) {
+            count++;
+        }
         new Player(o);
     });
+    setTotalPlayersCount(count + 1);
 });
 
 socket.on('peer-left', function (uuid) {
-    setTotalPlayersCount(_countCount - 1);
     _uuids[uuid].die(); // should cleanup
 });
 socket.on('peer-join', function (uuid) {
-    setTotalPlayersCount(_countCount + 1);
     new Player(uuid);
 });
 
@@ -291,10 +301,12 @@ socket.on('jump', function (o) {
 });
 
 socket.on('start', function (uuid) {
+    setTotalPlayersCount(_countCount + 1);
     _uuids[uuid].start();
 });
 
 socket.on('die', function (uuid) {
+    setTotalPlayersCount(_countCount - 1);
     _uuids[uuid].die();
 });
 

@@ -61,10 +61,16 @@ var replayclickable = false;
 
 //sounds
 var volume = 30;
-var hoo = new buzz.sound("assets/sounds/hoooo.ogg");
 var soundJump = [
-    hoo
+    new buzz.sound("assets/sounds/hoooo_bis.ogg"),
+    new buzz.sound("assets/sounds/jump2.ogg"),
+    new buzz.sound("assets/sounds/jump3.ogg"),
+    new buzz.sound("assets/sounds/jump4.ogg"),
+    new buzz.sound("assets/sounds/jump5_fast.ogg"),
+    new buzz.sound("assets/sounds/jump6.ogg"),
+    new buzz.sound("assets/sounds/jump_1.ogg"),
 ];
+var soundScoreHigh = new buzz.sound("assets/sounds/fuck_yeah_fast.ogg");
 var soundScore = new buzz.sound("assets/sounds/ho-yeah_point.ogg");
 var soundHit = new buzz.sound("assets/sounds/die_ouch.ogg");
 var soundDie = new buzz.sound("assets/sounds/game_over_kombat_grave.ogg");
@@ -176,24 +182,21 @@ function gameloop() {
 }
 
 //Handle space bar
-$(document).keydown(function(e) {
+document.onkeydown = function(e) {
     //space bar!
     if (e.keyCode == 32) {
         //in ScoreScreen, hitting space should click the "replay" button. else it's just a regular spacebar hit
         if (currentstate == states.ScoreScreen)
             $("#replay").click();
         else
-            screenClick();
+            screenClick(e);
     }
-});
+};
 
 //Handle mouse down OR touch start
-if ("ontouchstart" in window)
-    $(document).on("touchstart", screenClick);
-else
-    $(document).on("mousedown", screenClick);
-
-function screenClick(e) {
+document.ontouchstart = screenClick;
+document.onmousedown = screenClick;
+function screenClick(event) {
     if (event.target.nodeName === 'INPUT') { return; }
     if (currentstate == states.GameScreen) {
         _mainPlayer.jump();
@@ -275,6 +278,7 @@ function gameOver() {
     } else {
         //play the hit sound (then the dead sound) and then show score
         soundHit.play().bindOnce("ended", function() {
+            soundReady.stop()
             soundDie.play().bindOnce("ended", function() {
                 showScore();
             });

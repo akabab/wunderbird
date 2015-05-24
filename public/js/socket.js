@@ -1,4 +1,5 @@
 var socket = io();
+console.log("Welcome to the chat:");
 
 /* set pseudo and notify peers */
 $('#set-pseudo').submit(function () {
@@ -14,6 +15,7 @@ $('#set-pseudo').submit(function () {
 $('#chat').submit(function () {
     var p = $('#say');
     socket.emit('say', p.val());
+	console.log("Me: " + p.val());
     p.val('');
     return false;
 });
@@ -22,7 +24,7 @@ $('#chat').submit(function () {
 socket.on('say', function (o) {
     var uuid = o.uuid;
     var message = o.message;
-    console.log("%s: %s", uuid, message);
+    console.log("%s: %s", _uuids[uuid].pseudo || "?", message);
 });
 
 /* Relayr events */
