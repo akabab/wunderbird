@@ -22,12 +22,16 @@ function Player(o) {
     _playerPool.push(this);
 
     if (this.isMain()) {
+        this.setPseudo(readCookie("pseudo"));
         _gameDiv.appendChild(div);
-        this.active = true;
+        this.active = false;
     } else {
         this.HTMLElement.style.opacity = 0.5;
         this.uuid = o.uuid;
         this.setPseudo(o.pseudo);
+        if (o.active) {
+            _gameDiv.appendChild(div);
+        }
         this.active = o.active;
         _uuids[o.uuid] = this;
     }
@@ -38,14 +42,13 @@ Player.prototype.$ = function() {
 }
 
 Player.prototype.start = function() {
-    console.log('#id' + this.id, 'start');
     if (this.isMain()) {
         this.emit('start');
     } else {
-        this.active = true;
         this.restore();
         _gameDiv.appendChild(this.HTMLElement);
     }
+    this.active = true;
 };
 
 Player.prototype.setPseudo = function(pseudo) {
@@ -75,8 +78,8 @@ Player.prototype.die = function() {
         this.emit('die');
     } else {
         setTimeout(this.HTMLElement.remove.bind(this.HTMLElement), 1000);
-        this.active = false;
     }
+    this.active = false;
 };
 
 Player.prototype.emit = function(action) {
@@ -87,13 +90,15 @@ Player.prototype.isMain = function() {
     return this.id === 0;
 }
 
-Player.prototype.jump = function() {
+Player.prototype.jump = function(position) {
     this.velocity = -4.6;
     //play jump sound
     if (this.isMain()) {
         soundJump.stop();
         soundJump.play();
-        this.emit('jump');
+        socket.emit('jump', this.position);
+    } else {
+        this.position = position;
     }
 };
 
@@ -150,6 +155,12 @@ Player.prototype.calcCollision = function() {
     var boxright = boxleft + boxwidth;
     var boxbottom = boxtop + boxheight;
 
+    //did we enter water?
+    this.powerMorphing((box.bottom >= ($("#water").offset().top - 30)));
+    if (!this.active) {
+        return this;
+    }
+
     //if we're in debug mode, draw the bounding box
     if (debugmode) {
         this.box.css('left', boxleft);
@@ -163,9 +174,6 @@ Player.prototype.calcCollision = function() {
         this.die();
         return this;
     }
-
-    //did we enter water?
-    this.powerMorphing((box.bottom >= ($("#water").offset().top - 30)));
 
     //have they tried to escape through the ceiling? :o
     var ceiling = $("#ceiling");
@@ -264,12 +272,9 @@ socket.on('peer-join', function (uuid) {
     new Player(uuid);
 });
 
-socket.on('jump', function (uuid) {
+socket.on('jump', function (o) {
     // console.log('Player jumped: %s', uuid);
-    if (_uuids[uuid])
-    	_uuids[uuid].jump();
-    else
-    	console.log("no player: %s", uuid);
+    _uuids[o.uuid].jump(o.position);
 });
 
 socket.on('start', function (uuid) {
@@ -283,5 +288,6 @@ socket.on('die', function (uuid) {
 });
 
 socket.on('peer-pseudo', function (o) {
+    console.log('Player set pseudo: %s -> %s', o.uuid, o.pseudo);
     _uuids[o.uuid].setPseudo(o.pseudo);
 });

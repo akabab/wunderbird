@@ -3,8 +3,10 @@ var socket = io();
 /* set pseudo and notify peers */
 $('#set-pseudo').submit(function () {
     var p = $('#pseudo-input');
-    socket.emit('pseudo', p.val());
-    _mainPlayer.setPseudo(p.val());
+    var pseudo = p.val();
+    socket.emit('pseudo', pseudo);
+    _mainPlayer.setPseudo(pseudo);
+    createCookie("pseudo", pseudo, 7);
     p.val('');
     return false;
 });
@@ -33,12 +35,20 @@ socket.on('color', function (color) {
     // console.log(color);
 });
 
+/* FINGERING */
+var _hand = $('#hand'); //document.getElementById('hand');
+socket.on('proximity', function (proximity) {
+	var tx = 500 - proximity * 5;
+	_hand.css('transform', 'rotateZ(46deg) translate(' + tx + 'px, 130px)');
+});
+
 /* HUMIDITY */
 var _water = $("#water");
-var _waterLevel = 0; //[0-500]
+var _waterLevel = 0;
+var _waterLevelMax = 500;
 socket.on('humidity', function (humidity) {
     // console.log("Humidity: %s", humidity);
-    _waterLevel = humidity / 100 * 500;
+    _waterLevel = humidity / 100 * _waterLevelMax;
     _water.css('height', _waterLevel);
 });
 

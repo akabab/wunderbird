@@ -111,9 +111,6 @@ Screen - Game
 #gamescreen {
     position: absolute;
     overflow: hidden;
-    /*width: 100%;*/
-    /*height: 100%;*/
-
     width: 322px;
     height: 544px;
 }
@@ -140,7 +137,7 @@ Screen - Game
     bottom: 0;
     position: absolute;
     z-index: 20;
-    transition: height 5s linear;
+    transition: height 5s ease-out;
 }
 
 #water::before {
@@ -279,6 +276,19 @@ Screen - Game
     width: 0;
     height: 0;
     border: 1px solid red;
+}
+
+#hand {
+   position: absolute;
+   height: 250px;
+   width: 350px;
+   transform: rotateZ(46deg) translate(500px, 130px);
+   transition: transform 500ms ease-out;
+   background-image: url('../assets/hand.png');
+   background-size: contain;
+   background-repeat: no-repeat;
+   image-rendering: pixelated;
+	z-index: 9999;
 }
 
 #player {

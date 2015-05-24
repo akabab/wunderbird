@@ -50,7 +50,6 @@ var soundSwoosh = new buzz.sound("assets/sounds/sfx_swooshing.ogg");
 buzz.all().setVolume(volume);
 
 //loops
-var gameLoopActive;
 var loopPipeloop;
 
 var _mainPlayer;
@@ -70,6 +69,7 @@ $(document).ready(function() {
 
     //start with the splash screen
     showSplash();
+    requestAnimationFrame(gameloop);
 
 });
 
@@ -134,9 +134,7 @@ function startGame() {
 
     //start up our loops
     updatePipes();
-    gameLoopActive = true;
     _previousTime = window.performance.now();
-    requestAnimationFrame(gameloop);
     loopPipeloop = setInterval(updatePipes, 1400);
 
     //jump from the start!
@@ -149,9 +147,7 @@ function gameloop() {
     Player.forEach.update(diff / 16);
     _mainPlayer.calcCollision();
 
-    if (gameLoopActive) {
-        requestAnimationFrame(gameloop);
-    }
+    requestAnimationFrame(gameloop);
     _previousTime += diff;
 }
 
@@ -173,7 +169,8 @@ if ("ontouchstart" in window)
 else
     $(document).on("mousedown", screenClick);
 
-function screenClick() {
+function screenClick(e) {
+    if (event.target.nodeName === 'INPUT') { return; }
     if (currentstate == states.GameScreen) {
         _mainPlayer.jump();
     } else if (currentstate == states.SplashScreen) {
@@ -245,7 +242,6 @@ function gameOver() {
 
     //destroy our gameloops
     clearInterval(loopPipeloop);
-    gameLoopActive = false;
     loopPipeloop = null;
 
     //mobile browsers don't support buzz bindOnce event

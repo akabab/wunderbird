@@ -142,8 +142,8 @@ io.on('connection', function (socket) {
     });
 
     /* player jump */
-    socket.on('jump', function () {
-        socket.broadcast.emit('jump', socket.uuid); //+pos
+    socket.on('jump', function (position) {
+        socket.broadcast.emit('jump', {uuid: socket.uuid, position: position});
     });
 
     /* player start */
