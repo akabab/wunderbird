@@ -8,6 +8,8 @@ var http = require('http');
 var debug = require('debug')('wunderfun:server');
 var uuid = require('node-uuid');
 
+var Relayr = require("./lib/Relayr");
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
@@ -111,19 +113,20 @@ io.on('connection', function (socket) {
     socket.uuid = uuid.v4();
     socket.active = false;
     socket.pseudo = "";
+    socket.score = 0;
 
     console.log('new player connected: %s', socket.uuid);
 
     /* send to myself  */
     socket.emit('peer-list', _sockets.map(function (s) {
-        return { uuid: s.uuid, active: s.active, pseudo: s.pseudo };
+        return { uuid: s.uuid, active: s.active, pseudo: s.pseudo, score: s.score };
     }));
 
     /* push socket */
     _sockets.push(socket);
 
     /* send peer event to others with his uuid */
-    socket.broadcast.emit('peer-join', { uuid: socket.uuid, active: socket.active, pseudo: socket.pseudo });
+    socket.broadcast.emit('peer-join', { uuid: socket.uuid, active: socket.active, pseudo: socket.pseudo, score: socket.score });
 
     /* player left */
     socket.on('disconnect', function () {
@@ -146,9 +149,16 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('jump', {uuid: socket.uuid, position: position});
     });
 
+    /* player score */
+    socket.on('score', function (score) {
+        socket.score = score;
+        socket.broadcast.emit('score', {uuid: socket.uuid, score: score});
+    });
+
     /* player start */
     socket.on('start', function () {
         socket.active = true;
+        socket.score = 0;
         socket.broadcast.emit('start', socket.uuid);
     });
 
@@ -163,10 +173,17 @@ io.on('connection', function (socket) {
         console.log('message from %s: %s', socket.pseudo || '?', message);
         socket.broadcast.emit('say', {uuid: socket.uuid, message: message});
     });
+
+
+    /* DEVICES */
+    socket.on('device', function (name) {
+        var status = Relayr.toggleSensor(name);
+        socket.emit('device-status', {name: name, status: status});
+    });
 });
 
-var Relayr = require("./lib/Relayr");
 Relayr.setIO(io);
+Relayr.start();
 
 server.listen(port);
 server.on('error', onError);

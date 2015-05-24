@@ -7,27 +7,32 @@ function Player(o) {
     var div, box, pseudo;
     this.id = _playerPool.length;
     div = document.createElement('div');
-    box = document.createElement('div');
-    pseudo = document.createElement('div');
-    div.className = "bird animated";
-    box.className = "boundingbox";
-    pseudo.className = "pseudo";
+    text = document.createElement('div');
+    pseudo = document.createElement('span');
+    score = document.createElement('span');
     div.id = "player-" + this.id;
-    div.appendChild(pseudo);
-    document.body.appendChild(box);
-    this.box = box;
+    div.className = "bird animated";
+    pseudo.className = "pseudo";
+    score.className = "pseudo";
+    text.appendChild(pseudo);
+    text.appendChild(score);
+    div.appendChild(text);
     this.HTMLElement = div;
     this.restore();
+    this.scoreElement = score;
     this.pseudoElement = pseudo;
     _playerPool.push(this);
-
     if (this.isMain()) {
-        this.setPseudo(readCookie("pseudo"));
+        box = document.createElement('div');
+        box.className = "boundingbox";
+        this.box = box;
+        document.body.appendChild(box);
         _gameDiv.appendChild(div);
         this.active = false;
     } else {
         this.HTMLElement.style.opacity = 0.5;
         this.uuid = o.uuid;
+        this.addScore(o.score);
         this.setPseudo(o.pseudo);
         if (o.active) {
             _gameDiv.appendChild(div);
@@ -49,6 +54,7 @@ Player.prototype.start = function() {
         _gameDiv.appendChild(this.HTMLElement);
     }
     this.active = true;
+    this.addScore(0);
 };
 
 Player.prototype.setPseudo = function(pseudo) {
@@ -56,12 +62,18 @@ Player.prototype.setPseudo = function(pseudo) {
     this.pseudoElement.textContent = pseudo;
 };
 
-Player.prototype.addScore = function() {
-    this.score++;
-    if (this.id === 0) {
+Player.prototype.addScore = function(score) {
+    if (score) {
+        this.score = score;
+    } else {
+        this.score++;
+    }
+    this.scoreElement.textContent = this.score;
+    if (this.isMain()) {
         soundScore.stop();
         soundScore.play();
         setBigScore();
+        socket.emit('score', this.score);
     }
 };
 
@@ -90,7 +102,7 @@ Player.prototype.isMain = function() {
     return this.id === 0;
 }
 
-Player.prototype.jump = function(position) {
+Player.prototype.jump = function (position) {
     this.velocity = -4.6;
     //play jump sound
     if (this.isMain()) {
@@ -98,6 +110,7 @@ Player.prototype.jump = function(position) {
         soundJump.play();
         socket.emit('jump', this.position);
     } else {
+        console.log(position);
         this.position = position;
     }
 };
@@ -143,6 +156,7 @@ Player.prototype.update = function(diff) {
 };
 
 Player.prototype.calcCollision = function() {
+    if (!this.isMain()) { return this; }
     //create the bounding box
     var box = this.HTMLElement.getBoundingClientRect();
     var origwidth = 34.0;
@@ -263,12 +277,12 @@ socket.on('peer-list', function(list) {
 
 socket.on('peer-left', function (uuid) {
     setTotalPlayersCount(_countCount - 1);
-    console.log('player#' + uuid, " left !")
+    console.log('player#' + uuid, " left !");
     _uuids[uuid].die(); // should cleanup
 });
 socket.on('peer-join', function (uuid) {
     setTotalPlayersCount(_countCount + 1);
-    console.log('Player joined: %s', uuid)
+    console.log('Player joined: %s', uuid);
     new Player(uuid);
 });
 
@@ -285,6 +299,10 @@ socket.on('start', function (uuid) {
 socket.on('die', function (uuid) {
     console.log('Player died: %s', uuid);
     _uuids[uuid].die();
+});
+
+socket.on('score', function (o) {
+    _uuids[o.uuid].addScore(o.score);
 });
 
 socket.on('peer-pseudo', function (o) {
