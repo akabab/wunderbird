@@ -16,7 +16,7 @@ socket.on('device-status', function (o) {
 socket.on('device-value', function (o) {
     // console.log(o);
     var name = o.name;
-    var value = o.value;
+    var value = typeof o.value === "object" ? JSON.stringify(o.value) : o.value;
     var Element = $('#' + name + ' .value');
     Element.text(value ? value : 'null');
 });

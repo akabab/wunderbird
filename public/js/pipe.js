@@ -22,7 +22,6 @@ function Pipe(height, space) {
 	_pipePool.push(this);
 }
 
-
 Pipe.cleanup = function() {
 	_pipePool = _pipePool.filter(function (pipe) {
 		if ($(pipe.HTMLElement).position().left <= -100) {

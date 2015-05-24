@@ -3,7 +3,6 @@ var _playerPool = [],
     _gameDiv = document.getElementById('flyarea');
 
 function Player(o) {
-	console.log("Player construct", o);
     var div, box, pseudo, score;
     this.id = _playerPool.length;
     div = document.createElement('div');
@@ -109,8 +108,9 @@ Player.prototype.jump = function (position) {
     this.velocity = -4.6;
     //play jump sound
     if (this.isMain()) {
-        soundJump.stop();
-        soundJump.play();
+        var id = ~~(Math.random() * soundJump.length);
+        soundJump[id].stop();
+        soundJump[id].play();
         socket.emit('jump', this.position);
     } else {
         this.position = position;
@@ -273,34 +273,28 @@ function setTotalPlayersCount(count) {
 socket.on('peer-list', function(list) {
     setTotalPlayersCount(list.length + 1);
     list.forEach(function(o) {
-    	console.log("Player already there: %s", o.pseudo);
         new Player(o);
     });
 });
 
 socket.on('peer-left', function (uuid) {
     setTotalPlayersCount(_countCount - 1);
-    console.log('player#' + uuid, " left !");
     _uuids[uuid].die(); // should cleanup
 });
 socket.on('peer-join', function (uuid) {
     setTotalPlayersCount(_countCount + 1);
-    console.log('Player joined: %s', uuid);
     new Player(uuid);
 });
 
 socket.on('jump', function (o) {
-    // console.log('Player jumped: %s', uuid);
     _uuids[o.uuid].jump(o.position);
 });
 
 socket.on('start', function (uuid) {
-    console.log('Player started: %s', uuid);
     _uuids[uuid].start();
 });
 
 socket.on('die', function (uuid) {
-    console.log('Player died: %s', uuid);
     _uuids[uuid].die();
 });
 
@@ -309,6 +303,5 @@ socket.on('score', function (o) {
 });
 
 socket.on('peer-pseudo', function (o) {
-    console.log('Player set pseudo: %s -> %s', o.uuid, o.pseudo);
     _uuids[o.uuid].setPseudo(o.pseudo);
 });

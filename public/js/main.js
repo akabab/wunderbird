@@ -32,21 +32,44 @@ var pipeheight = 140;
 /* set pipe height */
 var _avgHeight = 140;
 var _avgTemp = 25;
+var _prevTemp = null;
 socket.on('temperature', function (temp) {
-    var h = temp / _avgTemp * _avgHeight;
-    // console.log("temp: %s, h: %s", temp, h);
-    pipeheight = Math.floor(h);
+    if (_prevTemp !== null) {
+        var diff = (_prevTemp - temp);
+        if (diff === 0) {
+            pipeheight = (pipeheight > 140) ? pipeheight - 10 : pipeheight + 10;
+        } else if (diff < 0) {
+            pipeheight -= 10;
+        } else {
+            pipeheight += 10;
+        }
+        pipeheight = Math.max(Math.min(pipeheight, 300), 80);
+    }
+    _prevTemp = temp;
+});
+
+var _pipeY = 0;
+socket.on('acceleration', function (angles) {
+    if (angles.y > 0.1 || angles.y < -0.1) {
+        _pipeY = (angles.y + 1) / 2;
+    } else {
+        _pipeY = 0;
+    }
 });
 
 var replayclickable = false;
 
 //sounds
 var volume = 30;
-var soundJump = new buzz.sound("assets/sounds/sfx_wing.ogg");
-var soundScore = new buzz.sound("assets/sounds/sfx_point.ogg");
-var soundHit = new buzz.sound("assets/sounds/sfx_hit.ogg");
-var soundDie = new buzz.sound("assets/sounds/sfx_die.ogg");
+var hoo = new buzz.sound("assets/sounds/hoooo.ogg");
+var soundJump = [
+    hoo
+];
+var soundScore = new buzz.sound("assets/sounds/ho-yeah_point.ogg");
+var soundHit = new buzz.sound("assets/sounds/die_ouch.ogg");
+var soundDie = new buzz.sound("assets/sounds/game_over_kombat_grave.ogg");
 var soundSwoosh = new buzz.sound("assets/sounds/sfx_swooshing.ogg");
+var soundReady = new buzz.sound("assets/sounds/ready_set_flyyy.ogg");
 buzz.all().setVolume(volume);
 
 //loops
@@ -125,7 +148,8 @@ function startGame() {
 
     //update the big score
     setBigScore();
-
+    soundReady.stop();
+    soundReady.play();
     //debug mode?
     if (debugmode) {
         //show the bounding boxes
@@ -347,7 +371,8 @@ $("#replay").click(function() {
 function updatePipes() {
     Pipe.cleanup();
 
-    new Pipe(Math.random(), pipeheight);
+    // new Pipe(Math.random(), pipeheight);
+    new Pipe(_pipeY || Math.random(), pipeheight);
 }
 
 var isIncompatible = {
