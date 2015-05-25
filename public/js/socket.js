@@ -14,9 +14,12 @@ $('#set-pseudo').submit(function () {
 
 $('#chat').submit(function () {
     var p = $('#say');
-    socket.emit('say', p.val());
-	console.log("Me: " + p.val());
-    p.val('');
+    if (p.val()) {
+		socket.emit('say', p.val());
+		console.log("Me: " + p.val());
+		$('#text').append("<p>Me: "+p.val()+"</p>");
+    }
+	p.val('');
     return false;
 });
 
@@ -24,7 +27,11 @@ $('#chat').submit(function () {
 socket.on('say', function (o) {
     var uuid = o.uuid;
     var message = o.message;
-    console.log("%s: %s", _uuids[uuid].pseudo || "?", message);
+	var pseudo = _uuids[uuid].pseudo || "?";
+	if (message) {
+		$('#text').append("<p>"+pseudo+": "+message+"</p>");
+    	console.log("%s: %s", pseudo, message);
+	}
 });
 
 /* Relayr events */

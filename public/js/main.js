@@ -34,6 +34,12 @@ var _avgHeight = 140;
 var _avgTemp = 25;
 var _prevTemp = null;
 socket.on('temperature', function (temp) {
+pipeheight = 125 - (temp - 22) * 3;	
+	//console.log(temp, pipeheight);
+	
+});
+
+socket.on('-temperature', function (temp) {
     if (_prevTemp !== null) {
         var diff = (_prevTemp - temp);
         if (diff === 0) {

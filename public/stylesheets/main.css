@@ -278,12 +278,23 @@ Screen - Game
     border: 1px solid red;
 }
 
+#text {
+	position: absolute;
+	height: 80%;
+	width: 100%;
+	top: 20px;
+	left: 5px;
+	z-index: 100000;
+}
+
 #hand {
    position: absolute;
    height: 250px;
    width: 350px;
    transform: rotateZ(46deg) translate(500px, 130px);
+   -webkit-transform: rotateZ(46deg) translate(500px, 130px);
    transition: transform 500ms ease-out;
+   transition: -webkit-transform 500ms ease-out;
    background-image: url('../assets/hand.png');
    background-size: contain;
    background-repeat: no-repeat;
