@@ -7,7 +7,7 @@ $('#set-pseudo').submit(function () {
     var pseudo = p.val();
     socket.emit('pseudo', pseudo);
     _mainPlayer.setPseudo(pseudo);
-    createCookie("pseudo", pseudo, 7);
+    getCookie("pseudo", pseudo, 7);
     p.val('');
     return false;
 });

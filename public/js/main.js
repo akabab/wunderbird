@@ -34,12 +34,11 @@ var _avgHeight = 140;
 var _avgTemp = 25;
 var _prevTemp = null;
 socket.on('temperature', function (temp) {
-pipeheight = 125 - (temp - 22) * 3;	
+    pipeheight = 125 - (temp - 22) * 3;
 	//console.log(temp, pipeheight);
-	
 });
 
-socket.on('-temperature', function (temp) {
+socket.on('_temperature', function (temp) {
     if (_prevTemp !== null) {
         var diff = (_prevTemp - temp);
         if (diff === 0) {
@@ -107,23 +106,6 @@ $(document).ready(function() {
     requestAnimationFrame(gameloop);
 
 });
-
-function getCookie(cname) {
-    var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i].trim();
-        if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
-    }
-    return "";
-}
-
-function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    var expires = "expires=" + d.toGMTString();
-    document.cookie = cname + "=" + cvalue + "; " + expires;
-}
 
 function showSplash() {
     currentstate = states.SplashScreen;
@@ -200,9 +182,12 @@ document.onkeydown = function(e) {
 };
 
 //Handle mouse down OR touch start
-document.ontouchstart = screenClick;
-document.onmousedown = screenClick;
-function screenClick(event) {
+if ("ontouchstart" in window) {
+    document.ontouchstart = screenClick;
+}
+else
+    document.onmousedown = screenClick;
+function screenClick (event) {
     if (event.target.nodeName === 'INPUT') { return; }
     if (currentstate == states.GameScreen) {
         _mainPlayer.jump();

@@ -125,6 +125,8 @@ io.on('connection', function (socket) {
     /* push socket */
     _sockets.push(socket);
 
+    Relayr.emitAll();
+
     /* send peer event to others with his uuid */
     socket.broadcast.emit('peer-join', { uuid: socket.uuid, active: socket.active, pseudo: socket.pseudo, score: socket.score });
 

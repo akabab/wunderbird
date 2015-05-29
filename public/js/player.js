@@ -27,7 +27,7 @@ function Player(o) {
         this.box = box;
         document.body.appendChild(box);
         _gameDiv.appendChild(div);
-        this.setPseudo(readCookie('pseudo'));
+        this.setPseudo(getCookie('pseudo'));
         this.active = false;
     } else {
         this.HTMLElement.style.opacity = 0.5;
@@ -148,9 +148,13 @@ Player.prototype.restore = function() {
     this.rotation = 0;
     this.score = 0;
     this.addScore(0);
+    if (this.isMain())
+        this.positionX = 25;
+    else
+        this.positionX = 25 + Math.random() * 300;
     this.$().css({
         y: 0,
-        x: 25 * (this.id + 1)
+        x: this.positionX,
     });
     return this;
 };
