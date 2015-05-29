@@ -1,6 +1,6 @@
 # Wunder Bird
 
-[>> TRY IT <<](http://ycribier:8000)
+[>> GIVE IT A TRY <<](http://ycribier:8000)
 
 It's a remake of flappy bird, improved to be multiplayer online through a web page and directly influenced by the sensed data from the external environment.  
 
